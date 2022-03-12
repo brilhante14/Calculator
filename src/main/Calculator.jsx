@@ -21,6 +21,7 @@ export default class Calculator extends Component {
 
       this.clearMemory = this.clearMemory.bind(this);
       this.addDigit = this.addDigit.bind(this);
+      this.deleteLastDigit = this.deleteLastDigit.bind(this);  
       this.setOperation = this.setOperation.bind(this);
    }
 
@@ -30,7 +31,7 @@ export default class Calculator extends Component {
 
    setOperation(operation) {
       if (this.state.current === 0){
-         this.setState({displayValue: null, operation, current: 1, clearDisplay: true});
+         this.setState({displayValue: "", operation, current: 1, clearDisplay: true});
       }
       else {
          const equals = operation === "=";
@@ -59,13 +60,21 @@ export default class Calculator extends Component {
          values[1] = 0;
 
          this.setState({
-            displayValue: equals ? values[0] : null,
+            displayValue: equals ? values[0].toString() : "",
             operation: equals ? null : operation,
             current: equals ? 0 : 1,
             clearDisplay: true,
             values
          })
       }
+   }
+
+   setValue(displayValue){
+      const i = this.state.current;
+      const newValue = parseFloat(displayValue);
+      const values = [...this.state.values];
+      values[i] = newValue;
+      this.setState({values})
    }
 
    addDigit(n) {
@@ -81,13 +90,21 @@ export default class Calculator extends Component {
       this.setState({ displayValue, clearDisplay: false})
 
       if(n!=="."){
-         const i = this.state.current;
-         const newValue = parseFloat(displayValue);
-         const values = [...this.state.values];
-         values[i] = newValue;
-         this.setState({values})
+         this.setValue(displayValue)
       }
+   }
 
+   deleteLastDigit(){
+      let displayValue = "0";
+      console.log(this.state.displayValue.length, this.state.displayValue);
+      if(this.state.displayValue.length === 1 || this.state.displayValue === "0")
+         this.setState({displayValue});
+      else {
+         displayValue = this.state.displayValue.slice(0, -1);
+         this.setState({displayValue});
+      }
+      
+      this.setValue(displayValue);
    }
 
    render(){
@@ -99,7 +116,7 @@ export default class Calculator extends Component {
                   value={this.state.displayValue} 
                />
             <Button operator double label="AC" click={this.clearMemory}/>
-            <Button operator label="DEL" click={this.clearMemory}/>
+            <Button operator label="DEL" click={this.deleteLastDigit}/>
             <Button operator label="/" click={this.setOperation}/>
             <Button label="7" click={this.addDigit}/>
             <Button label="8" click={this.addDigit}/>
